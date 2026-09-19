@@ -13,8 +13,7 @@ FC1_RAG/
 ├── .gitignore
 ├── docker-compose.yml
 ├── requirements.txt
-├── data/
-│   └── document.pdf
+├── document.pdf
 ├── prompts/
 │   └── system_prompt.txt
 ├── shortcuts/
@@ -51,9 +50,12 @@ Interface de chat pelo terminal.
 ### 6. `prompts/system_prompt.txt`
 Template de sistema com regras estritas para o modelo. Ele inclui proteções contra prompt injections e garante que a resposta seja baseada unicamente no contexto do documento.
 
+### 7. `document.pdf` (Não incluso por padrão)
+Arquivo PDF base para a ingestão que deve ficar na raiz do projeto. Se quiser usar outro arquivo, coloque-o aqui com esse exato nome, ou altere a variável `PDF_PATH` no `.env`.
+
 ## ⚠️ Aviso Importante sobre o PDF
 
-A aplicação funciona **SOMENTE com um único arquivo PDF por vez** na pasta `/data`. Caso você precise mudar o PDF para fazer consultas sobre um documento diferente, é necessário **resetar o banco de dados** para limpar os dados antigos antes de fazer uma nova ingestão. Para isso, remova os volumes do banco e suba novamente:
+A aplicação funciona **SOMENTE com um único arquivo PDF por vez** (por padrão, o `document.pdf` na raiz do projeto). Caso você precise mudar o PDF para fazer consultas sobre um documento diferente, é necessário **resetar o banco de dados** para limpar os dados antigos antes de fazer uma nova ingestão. Para isso, rode o atalho:
 ```bash
 bash shortcuts/reset_and_init.sh
 ```
@@ -85,7 +87,7 @@ bash shortcuts/reset_and_init.sh
    Para facilitar a execução diária, criamos um único script consolidado na pasta `shortcuts/`. Você pode rodá-lo no Git Bash ou WSL.
 
    - **Fluxo Completo (Reset, Ingestão e Chat):**
-     Derruba o banco de dados para limpar contextos antigos, sobe o banco limpo, ingere o documento PDF atual da pasta `/data` e já abre o chat!
+     Derruba o banco de dados para limpar contextos antigos, sobe o banco limpo, ingere o documento PDF atual e já abre o chat!
      ```bash
      bash shortcuts/reset_and_init.sh
      ```
@@ -119,7 +121,6 @@ bash shortcuts/reset_and_init.sh
 - **Desacoplamento e Segurança de Prompt:** O prompt principal foi isolado (`prompts/system_prompt.txt`) e aprimorado com instruções explícitas para mitigar ataques de *Prompt Injection* e desvios de conduta do usuário.
 - **Isolamento de Credenciais e Configurações:** Chaves de API e strings de conexão de banco de dados são injetadas exclusivamente através do arquivo `.env`.
 - **Infraestrutura Desacoplada e Reprodutível:** O banco vetorial é levantado via Docker, garantindo que o ambiente do banco rode de forma idêntica em qualquer sistema operacional.
-- **Organização do Projeto:** Os recursos como PDFs estão estruturados no diretório isolado `/data`.
 
 ## Autoria
 
