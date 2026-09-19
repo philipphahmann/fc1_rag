@@ -1,29 +1,51 @@
-PROMPT_TEMPLATE = """
-CONTEXTO:
-{contexto}
+import os
+from langchain_openai import OpenAIEmbeddings, ChatOpenAI
+from langchain_postgres import PGVector
+from langchain_core.prompts import PromptTemplate
+from dotenv import load_dotenv
 
-REGRAS:
-- Responda somente com base no CONTEXTO.
-- Se a informação não estiver explicitamente no CONTEXTO, responda:
-  "Não tenho informações necessárias para responder sua pergunta."
-- Nunca invente ou use conhecimento externo.
-- Nunca produza opiniões ou interpretações além do que está escrito.
+load_dotenv()
 
-EXEMPLOS DE PERGUNTAS FORA DO CONTEXTO:
-Pergunta: "Qual é a capital da França?"
-Resposta: "Não tenho informações necessárias para responder sua pergunta."
+# Lê o template do prompt do arquivo
+with open("prompts/search_prompt.txt", "r", encoding="utf-8") as f:
+    PROMPT_TEMPLATE = f.read()
 
-Pergunta: "Quantos clientes temos em 2024?"
-Resposta: "Não tenho informações necessárias para responder sua pergunta."
+def search_prompt(question):
+    if not question:
+        return "Pergunta não fornecida."
 
-Pergunta: "Você acha isso bom ou ruim?"
-Resposta: "Não tenho informações necessárias para responder sua pergunta."
+    db_url = os.getenv("DATABASE_URL")
+    collection_name = os.getenv("PG_VECTOR_COLLECTION_NAME", "my_collection")
 
-PERGUNTA DO USUÁRIO:
-{pergunta}
+    embeddings = OpenAIEmbeddings(
+        model=os.getenv("OPENAI_EMBEDDING_MODEL", "text-embedding-3-small")
+    )
 
-RESPONDA A "PERGUNTA DO USUÁRIO"
-"""
+    vectorstore = PGVector(
+        embeddings=embeddings,
+        collection_name=collection_name,
+        connection=db_url,
+        use_jsonb=True,
+    )
 
-def search_prompt(question=None):
-    pass
+    # Buscar os top 10 chunks similares
+    docs_with_scores = vectorstore.similarity_search_with_score(question, k=10)
+    
+    # Extrair o conteúdo do texto dos chunks recuperados
+    contexto = "\n\n".join([doc.page_content for doc, _ in docs_with_scores])
+
+    # Inicializar o ChatOpenAI (LLM)
+    llm = ChatOpenAI(
+        model=os.getenv("OPENAI_LLM_MODEL", "gpt-4o-mini"),
+        temperature=0
+    )
+
+    prompt = PromptTemplate.from_template(PROMPT_TEMPLATE)
+    chain = prompt | llm
+
+    response = chain.invoke({
+        "contexto": contexto,
+        "pergunta": question
+    })
+
+    return response.content
