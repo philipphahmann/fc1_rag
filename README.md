@@ -17,6 +17,8 @@ FC1_RAG/
 │   └── document.pdf
 ├── prompts/
 │   └── system_prompt.txt
+├── shortcuts/
+│   └── reset_and_init.sh
 └── src/
     ├── chat.py
     ├── ingest.py
@@ -53,10 +55,8 @@ Template de sistema com regras estritas para o modelo. Ele inclui proteções co
 
 A aplicação funciona **SOMENTE com um único arquivo PDF por vez** na pasta `/data`. Caso você precise mudar o PDF para fazer consultas sobre um documento diferente, é necessário **resetar o banco de dados** para limpar os dados antigos antes de fazer uma nova ingestão. Para isso, remova os volumes do banco e suba novamente:
 ```bash
-docker-compose down -v
-docker-compose up -d
+bash shortcuts/reset_and_init.sh
 ```
-Após o reset, coloque o novo PDF na pasta `/data` e rode o script de ingestão novamente.
 
 ## Pré-requisitos
 
@@ -66,31 +66,31 @@ Após o reset, coloque o novo PDF na pasta `/data` e rode o script de ingestão 
 
 ## Instalação e Execução
 
-1. **Configurar variáveis de ambiente:**
+1. **Configurar o Ambiente Python:**
+   Crie uma máquina virtual (venv) e instale as dependências do projeto:
+   ```bash
+   python -m venv venv
+   source venv/Scripts/activate  # No Windows (Git Bash)
+   # source venv/bin/activate    # No Linux/Mac
+   pip install -r requirements.txt
+   ```
+
+2. **Configurar variáveis de ambiente:**
    Crie o seu `.env` com base no `.env.example` inserindo sua API Key:
    ```bash
    cp .env.example .env
    ```
 
-2. **Construir e iniciar os containers do banco de dados:**
-   ```bash
-   docker-compose up -d
-   ```
+3. **Atalho (Script de Automação):**
+   Para facilitar a execução diária, criamos um único script consolidado na pasta `shortcuts/`. Você pode rodá-lo no Git Bash ou WSL.
 
-3. **Ingerir o documento PDF:**
-   No seu terminal (com a venv ativada):
-   ```bash
-   python src/ingest.py
-   ```
+   - **Fluxo Completo (Reset, Ingestão e Chat):**
+     Derruba o banco de dados para limpar contextos antigos, sobe o banco limpo, ingere o documento PDF atual da pasta `/data` e já abre o chat!
+     ```bash
+     bash shortcuts/reset_and_init.sh
+     ```
 
-4. **Iniciar chat:**
-   No seu terminal (com a venv ativada):
-   ```bash
-   python src/chat.py
-   ```
-   ```
-   PERGUNTA: [sua pergunta]
-   ```
+*(Se preferir rodar cada etapa manualmente, você pode usar os comandos `docker-compose down -v && docker-compose up -d`, depois com a venv ativada rodar `python src/ingest.py` seguido de `python src/chat.py`)*
 
 ## Como Testar (Livro de História)
 

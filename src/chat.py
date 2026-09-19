@@ -1,13 +1,14 @@
 from search import search_prompt
 
 def main():
-    print("Iniciando chat com o banco de dados do PDF... (Digite 'sair' para encerrar)")
-    print("-" * 50)
+    print("==================================================")
+    print("Chat iniciado! (Digite 'sair' para encerrar)")
+    print("==================================================")
     while True:
         try:
-            question = input("PERGUNTA: ")
+            question = input("\nPERGUNTA: ")
             if question.strip().lower() in ['sair', 'exit', 'quit']:
-                print("Encerrando o chat.")
+                print("\n👋 Encerrando o chat. Até logo!\n")
                 break
             
             if not question.strip():
@@ -15,9 +16,9 @@ def main():
 
             resposta = search_prompt(question)
             print(f"RESPOSTA: {resposta}\n")
-            print("-" * 50)
+            print("--------------------------------------------------")
         except KeyboardInterrupt:
-            print("\nEncerrando o chat.")
+            print("\n👋 Encerrando o chat. Até logo!\n")
             break
 
 if __name__ == "__main__":
