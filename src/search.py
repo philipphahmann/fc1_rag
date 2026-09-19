@@ -1,14 +1,14 @@
 import os
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_postgres import PGVector
-from langchain_core.prompts import PromptTemplate
+from langchain_core.prompts import ChatPromptTemplate
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# Lê o template do prompt do arquivo
-with open("prompts/search_prompt.txt", "r", encoding="utf-8") as f:
-    PROMPT_TEMPLATE = f.read()
+# Lê o template de sistema do arquivo
+with open("prompts/system_prompt.txt", "r", encoding="utf-8") as f:
+    SYSTEM_TEMPLATE = f.read()
 
 def search_prompt(question):
     if not question:
@@ -40,7 +40,10 @@ def search_prompt(question):
         temperature=0
     )
 
-    prompt = PromptTemplate.from_template(PROMPT_TEMPLATE)
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", SYSTEM_TEMPLATE),
+        ("human", "{pergunta}")
+    ])
     chain = prompt | llm
 
     response = chain.invoke({
