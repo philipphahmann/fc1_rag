@@ -50,7 +50,7 @@ Interface de chat pelo terminal.
 ### 6. `prompts/system_prompt.txt`
 Template de sistema com regras estritas para o modelo. Ele inclui proteções contra prompt injections e garante que a resposta seja baseada unicamente no contexto do documento.
 
-### 7. `document.pdf` (Não incluso por padrão)
+### 7. `document.pdf`
 Arquivo PDF base para a ingestão que deve ficar na raiz do projeto. Se quiser usar outro arquivo, coloque-o aqui com esse exato nome, ou altere a variável `PDF_PATH` no `.env`.
 
 ## ⚠️ Aviso Importante sobre o PDF
